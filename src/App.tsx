@@ -25,14 +25,20 @@ console.log("WebSocket URL:", WS_URL);
 const STORAGE_KEY = "eyes_conversations";
 const ACTIVE_KEY = "eyes_active_id";
 
-function loadConversations(): {
+const loadConversations = (): {
   conversations: Conversation[];
   activeId: string;
-} {
+} => {
   try {
     const messagesJSON = localStorage.getItem(STORAGE_KEY);
     if (messagesJSON) {
-      const convs: Conversation[] = JSON.parse(messagesJSON);
+      const convs: Conversation[] = JSON.parse(messagesJSON).filter(
+        (c: Conversation) =>
+          c.id &&
+          c.title &&
+          Array.isArray(c.messages) &&
+          c.messages.every((m) => m.id && m.role && m.content),
+      );
       if (convs.length > 0) {
         const savedActive = localStorage.getItem(ACTIVE_KEY);
         const activeId =
@@ -49,7 +55,7 @@ function loadConversations(): {
     conversations: [{ id, title: "New chat", messages: [] }],
     activeId: id,
   };
-}
+};
 
 const initial = loadConversations();
 
