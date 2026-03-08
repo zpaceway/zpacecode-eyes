@@ -252,7 +252,11 @@ const App = () => {
             <div className="flex-1 overflow-y-auto">
               <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8">
                 {active.messages
-                  .filter((m) => m.role === "user" || m.role === "assistant")
+                  .filter(
+                    (m) =>
+                      (m.role === "user" || m.role === "assistant") &&
+                      m.content,
+                  )
                   .map((m, i) => (
                     <div
                       key={(m.id as string) ?? i}
