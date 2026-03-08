@@ -2,21 +2,6 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-declare global {
-  interface Window {
-    zpacecode?: {
-      fetch(url: string): Promise<{
-        html: string;
-        status: number;
-        statusText: string;
-        headers: Record<string, string>;
-        ok: boolean;
-        url: string;
-      }>;
-    };
-  }
-}
-
 type DisplayMessage = {
   id: string;
   role: "user" | "assistant";
