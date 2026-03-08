@@ -2,19 +2,16 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-type DisplayMessage = {
+type Message = {
   id: string;
   role: "user" | "assistant";
   content: string;
 };
 
-type RawMessage = Record<string, unknown>;
-
 type Conversation = {
   id: string;
   title: string;
-  rawMessages: RawMessage[];
-  displayMessages: DisplayMessage[];
+  messages: Message[];
 };
 
 const protocol =
@@ -33,9 +30,9 @@ function loadConversations(): {
   activeId: string;
 } {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const convs: Conversation[] = JSON.parse(raw);
+    const messagesJSON = localStorage.getItem(STORAGE_KEY);
+    if (messagesJSON) {
+      const convs: Conversation[] = JSON.parse(messagesJSON);
       if (convs.length > 0) {
         const savedActive = localStorage.getItem(ACTIVE_KEY);
         const activeId =
@@ -49,9 +46,7 @@ function loadConversations(): {
   }
   const id = crypto.randomUUID();
   return {
-    conversations: [
-      { id, title: "New chat", rawMessages: [], displayMessages: [] },
-    ],
+    conversations: [{ id, title: "New chat", messages: [] }],
     activeId: id,
   };
 }
@@ -82,28 +77,19 @@ const App = () => {
         const data = JSON.parse(event.data);
         if (data.error) return;
 
-        const { type, conversation_id } = data;
-        if (type === "assistant") {
-          const msg: DisplayMessage = {
-            id: crypto.randomUUID(),
-            role: "assistant",
-            content: data.message.content,
-          };
+        const { conversation_id, messages, completed } = data;
+
+        if (messages) {
           setConversations((prev) =>
             prev.map((c) =>
               c.id === conversation_id
-                ? { ...c, displayMessages: [...c.displayMessages, msg] }
+                ? { ...c, messages: messages as Message[] }
                 : c,
             ),
           );
-        } else if (type === "history") {
-          setConversations((prev) =>
-            prev.map((c) =>
-              c.id === conversation_id
-                ? { ...c, rawMessages: data.messages as RawMessage[] }
-                : c,
-            ),
-          );
+        }
+
+        if (completed) {
           setLoadingIds((prev) => {
             const next = new Set(prev);
             next.delete(conversation_id);
@@ -156,8 +142,7 @@ const App = () => {
     const conv: Conversation = {
       id,
       title: "New chat",
-      rawMessages: [],
-      displayMessages: [],
+      messages: [],
     };
     setConversations((prev) => [...prev, conv]);
     setActiveId(id);
@@ -175,8 +160,7 @@ const App = () => {
             {
               id: newId,
               title: "New chat",
-              rawMessages: [],
-              displayMessages: [],
+              messages: [],
             },
           ];
         }
@@ -195,36 +179,32 @@ const App = () => {
     const content = input.trim();
     setInput("");
 
-    const userMsg: DisplayMessage = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content,
-    };
-
-    let rawToSend: RawMessage[] = [];
+    let messages: Message[] = [];
 
     setConversations((prev) =>
       prev.map((c) => {
         if (c.id !== activeId) return c;
-        rawToSend = [...c.rawMessages, { role: "user", content }];
+        messages = [
+          ...c.messages,
+          { id: crypto.randomUUID(), role: "user", content },
+        ];
+        const isFirst = !c.messages.some((m) => m.role === "user");
         return {
           ...c,
-          title:
-            c.displayMessages.length === 0 ? content.slice(0, 40) : c.title,
-          displayMessages: [...c.displayMessages, userMsg],
-          rawMessages: rawToSend,
+          title: isFirst ? content.slice(0, 40) : c.title,
+          messages: messages,
         };
       }),
     );
 
     setLoadingIds((prev) => new Set(prev).add(activeId));
 
-    // Send after state update via microtask to ensure rawToSend is populated
+    // Send after state update via microtask to ensure messages is populated
     queueMicrotask(() => {
       ws.send(
         JSON.stringify({
           type: "agent_run",
-          messages: rawToSend,
+          messages: messages,
           conversation_id: activeId,
         }),
       );
@@ -271,22 +251,27 @@ const App = () => {
           <>
             <div className="flex-1 overflow-y-auto">
               <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8">
-                {active.displayMessages.map((m) => (
-                  <div key={m.id} className="flex flex-col gap-1">
-                    <div className="text-xs font-medium text-white/40">
-                      {m.role === "user" ? "You" : "Assistant"}
-                    </div>
+                {active.messages
+                  .filter((m) => m.role === "user" || m.role === "assistant")
+                  .map((m, i) => (
                     <div
-                      className={`prose prose-sm prose-invert max-w-none ${
-                        m.role === "user" ? "text-white" : "text-white/80"
-                      }`}
+                      key={(m.id as string) ?? i}
+                      className="flex flex-col gap-1"
                     >
-                      <Markdown remarkPlugins={[remarkGfm]}>
-                        {m.content}
-                      </Markdown>
+                      <div className="text-xs font-medium text-white/40">
+                        {m.role === "user" ? "You" : "Assistant"}
+                      </div>
+                      <div
+                        className={`prose prose-sm prose-invert max-w-none ${
+                          m.role === "user" ? "text-white" : "text-white/80"
+                        }`}
+                      >
+                        <Markdown remarkPlugins={[remarkGfm]}>
+                          {(m.content as string) ?? ""}
+                        </Markdown>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
                 {loading && (
                   <div className="flex flex-col gap-1">
                     <div className="text-xs font-medium text-white/40">
