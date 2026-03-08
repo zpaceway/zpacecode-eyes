@@ -65,7 +65,6 @@ const App = () => {
   const [activeId, setActiveId] = useState<string | null>(initial.activeId);
   const [input, setInput] = useState("");
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
-  const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
@@ -151,10 +150,6 @@ const App = () => {
   useEffect(() => {
     if (activeId) localStorage.setItem(ACTIVE_KEY, activeId);
   }, [activeId]);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [active?.displayMessages]);
 
   const createConversation = useCallback(() => {
     const id = crypto.randomUUID();
@@ -300,7 +295,6 @@ const App = () => {
                     <div className="text-sm text-white/50">Thinking...</div>
                   </div>
                 )}
-                <div ref={bottomRef} />
               </div>
             </div>
 
