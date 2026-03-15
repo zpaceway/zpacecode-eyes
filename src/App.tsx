@@ -16,9 +16,7 @@ type Conversation = {
 
 const protocol =
   import.meta.env.VITE_APP_BACKEND_PROTOCOL ||
-  window.location.protocol === "https:"
-    ? "wss"
-    : "ws";
+  (window.location.protocol === "https:" ? "wss" : "ws");
 const host = import.meta.env.VITE_APP_BACKEND_HOST || window.location.host;
 const WS_URL = `${protocol}://${host}/ws/agent/run/`;
 console.log("WebSocket URL:", WS_URL);
