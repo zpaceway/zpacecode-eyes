@@ -297,7 +297,7 @@ const App = () => {
 
     ws.send(
       JSON.stringify({
-        type: "agent_run",
+        type: "run",
         messages,
         conversation_id: activeId,
         token: settingsRef.current.brainToken || undefined,
