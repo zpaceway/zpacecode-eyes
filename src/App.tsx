@@ -121,6 +121,7 @@ const App = () => {
 
   useEffect(() => {
     let shouldReconnect = true;
+    let historySent = false;
 
     const connect = () => {
       const { protocol, host } = settingsRef.current;
@@ -128,6 +129,8 @@ const App = () => {
       wsRef.current = ws;
 
       ws.onopen = () => {
+        if (historySent) return;
+        historySent = true;
         const { brainToken } = settingsRef.current;
         if (!brainToken) return;
         const existingIds = JSON.parse(
