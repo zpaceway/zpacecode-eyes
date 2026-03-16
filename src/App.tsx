@@ -390,18 +390,29 @@ const App = () => {
                     (m) => m.content && ["user", "assistant"].includes(m.role),
                   )
                   .map((m) => (
-                    <div key={m.id} className="flex flex-col gap-1">
-                      <div className="text-xs font-medium text-white/40">
-                        {m.role === "user" ? "You" : "Assistant"}
-                      </div>
+                    <div
+                      key={m.id}
+                      className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+                    >
                       <div
-                        className={`prose prose-sm prose-invert max-w-none ${
-                          m.role === "user" ? "text-white" : "text-white/80"
+                        className={`flex max-w-[85%] flex-col gap-1 ${
+                          m.role === "user" ? "items-end" : "items-start"
                         }`}
                       >
-                        <Markdown remarkPlugins={[remarkGfm]}>
-                          {m.content}
-                        </Markdown>
+                        <div className="text-xs font-medium text-white/40">
+                          {m.role === "user" ? "You" : "Assistant"}
+                        </div>
+                        <div
+                          className={`prose prose-sm prose-invert max-w-none rounded-lg px-3 py-2 ${
+                            m.role === "user"
+                              ? "bg-white/10 text-white"
+                              : "text-white/80"
+                          }`}
+                        >
+                          <Markdown remarkPlugins={[remarkGfm]}>
+                            {m.content}
+                          </Markdown>
+                        </div>
                       </div>
                     </div>
                   ))}
