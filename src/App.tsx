@@ -18,7 +18,7 @@ type Conversation = {
 type Settings = {
   host: string;
   protocol: string;
-  password: string;
+  brainToken: string;
 };
 
 const STORAGE_KEY = "eyes_conversations";
@@ -30,7 +30,7 @@ const defaultSettings: Settings = {
   protocol:
     import.meta.env.VITE_APP_BACKEND_PROTOCOL ||
     (window.location.protocol === "https:" ? "wss" : "ws"),
-  password: "",
+  brainToken: "",
 };
 
 const loadSettings = (): Settings => {
@@ -264,7 +264,7 @@ const App = () => {
         type: "agent_run",
         messages,
         conversation_id: activeId,
-        token: settingsRef.current.password || undefined,
+        token: settingsRef.current.brainToken || undefined,
       }),
     );
   };
@@ -302,6 +302,7 @@ const App = () => {
         >
           +
         </button>
+        <div className="flex-1" />
         <button
           onClick={() => {
             setDraftSettings(settings);
@@ -364,14 +365,16 @@ const App = () => {
               placeholder="e.g. localhost:8000"
               className="mb-3 w-full rounded border border-white/20 bg-transparent px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-white/40"
             />
-            <label className="mb-1 block text-sm text-white/60">Password</label>
+            <label className="mb-1 block text-sm text-white/60">
+              Brain Token
+            </label>
             <input
               type="password"
-              value={draftSettings.password}
+              value={draftSettings.brainToken}
               onChange={(e) =>
-                setDraftSettings((d) => ({ ...d, password: e.target.value }))
+                setDraftSettings((d) => ({ ...d, brainToken: e.target.value }))
               }
-              placeholder="Bearer token"
+              placeholder="Brain token"
               className="mb-5 w-full rounded border border-white/20 bg-transparent px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-white/40"
             />
             <div className="flex justify-end gap-2">
