@@ -466,7 +466,7 @@ const App = () => {
                     className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`flex max-w-[85%] flex-col gap-1 ${
+                      className={`flex flex-col gap-1 ${
                         m.role === "user" ? "items-end" : "items-start"
                       }`}
                     >
