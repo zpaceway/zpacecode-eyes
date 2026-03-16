@@ -418,7 +418,7 @@ const App = () => {
                         }`}
                       >
                         <div
-                          className={`prose prose-sm prose-invert max-w-none rounded-lg px-2 py-1 ${
+                          className={`prose prose-sm prose-invert max-w-none rounded-lg px-4 py-2 ${
                             m.role === "user"
                               ? "bg-white/10 text-white"
                               : "text-white/80"
