@@ -257,7 +257,7 @@ const App = () => {
   return (
     <div className="fixed inset-0 flex flex-col bg-black text-white">
       <div className="flex h-11 shrink-0 items-center border-b border-white/10">
-        <div className="flex min-w-0 flex-1 items-center gap-0 overflow-x-auto">
+        <div className="flex min-w-0 items-center gap-0 overflow-x-auto">
           {conversations.map((c) => (
             <button
               key={c.id}
@@ -268,7 +268,7 @@ const App = () => {
                   : "text-white/50 hover:text-white/80"
               }`}
             >
-              <span className="flex-1 truncate">{c.title}</span>
+              <span className="truncate">{c.title}</span>
               <span
                 onClick={(e) => {
                   e.stopPropagation();
@@ -384,7 +384,7 @@ const App = () => {
         {active && (
           <>
             <div ref={scrollRef} className="flex-1 overflow-y-auto">
-              <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8">
+              <div className="mx-auto flex max-w-2xl flex-col gap-2 px-4 py-8">
                 {active.messages
                   .filter(
                     (m) => m.content && ["user", "assistant"].includes(m.role),
@@ -399,11 +399,8 @@ const App = () => {
                           m.role === "user" ? "items-end" : "items-start"
                         }`}
                       >
-                        <div className="text-xs font-medium text-white/40">
-                          {m.role === "user" ? "You" : "Assistant"}
-                        </div>
                         <div
-                          className={`prose prose-sm prose-invert max-w-none rounded-lg px-3 py-2 ${
+                          className={`prose prose-sm prose-invert max-w-none rounded-lg px-2 py-1 ${
                             m.role === "user"
                               ? "bg-white/10 text-white"
                               : "text-white/80"
@@ -427,8 +424,8 @@ const App = () => {
               </div>
             </div>
 
-            <div className="shrink-0 border-t border-white/10 px-4 py-3">
-              <div className="mx-auto flex max-w-2xl items-end gap-2">
+            <div className="flex shrink-0 justify-center border-t border-white/10 px-4 py-3">
+              <div className="flex w-full max-w-2xl items-end gap-2">
                 <textarea
                   ref={textareaRef}
                   value={input}
@@ -442,7 +439,7 @@ const App = () => {
                   }}
                   placeholder="Send a message..."
                   disabled={loading}
-                  className="min-w-0 flex-1 resize-none overflow-hidden rounded border border-white/20 bg-transparent px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-white/40 disabled:opacity-50"
+                  className="w-full min-w-0 resize-none overflow-hidden rounded border border-white/20 bg-transparent px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-white/40 disabled:opacity-50"
                 />
                 <button
                   onClick={send}
