@@ -24,6 +24,7 @@ type Settings = {
 const STORAGE_KEY = "eyes_conversations";
 const ACTIVE_KEY = "eyes_active_id";
 const SETTINGS_KEY = "eyes_settings";
+const CLOSED_KEY = "eyes_closed_ids";
 
 const defaultSettings: Settings = {
   host: import.meta.env.VITE_APP_BACKEND_HOST || window.location.host,
@@ -95,6 +96,16 @@ const App = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const settingsRef = useRef(settings);
+  const closedIdsRef = useRef<Set<string>>(
+    (() => {
+      try {
+        const json = localStorage.getItem(CLOSED_KEY);
+        return json ? new Set<string>(JSON.parse(json)) : new Set<string>();
+      } catch {
+        return new Set<string>();
+      }
+    })(),
+  );
 
   useEffect(() => {
     settingsRef.current = settings;
@@ -115,6 +126,22 @@ const App = () => {
       const { protocol, host } = settingsRef.current;
       const ws = new WebSocket(`${protocol}://${host}/ws/agent/run/`);
       wsRef.current = ws;
+
+      ws.onopen = () => {
+        const { brainToken } = settingsRef.current;
+        if (!brainToken) return;
+        const existingIds = JSON.parse(
+          localStorage.getItem(STORAGE_KEY) || "[]",
+        ).map((c: Conversation) => c.id);
+        const exclude = [...existingIds, ...Array.from(closedIdsRef.current)];
+        ws.send(
+          JSON.stringify({
+            type: "history",
+            token: brainToken,
+            exclude,
+          }),
+        );
+      };
 
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
@@ -223,6 +250,11 @@ const App = () => {
   };
 
   const closeConversation = (id: string) => {
+    closedIdsRef.current.add(id);
+    localStorage.setItem(
+      CLOSED_KEY,
+      JSON.stringify(Array.from(closedIdsRef.current)),
+    );
     setConversations((prev) => {
       if (prev.length <= 1) {
         return prev.map((c) =>
