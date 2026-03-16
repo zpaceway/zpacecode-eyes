@@ -340,7 +340,7 @@ const App = () => {
                   e.stopPropagation();
                   closeConversation(c.id);
                 }}
-                className="shrink-0 text-white/20 opacity-0 group-hover:opacity-100 hover:text-white"
+                className="shrink-0 text-white/20 opacity-100 hover:text-white md:opacity-0 md:group-hover:opacity-100"
               >
                 ×
               </span>
