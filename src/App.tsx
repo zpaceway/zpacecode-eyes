@@ -134,13 +134,28 @@ const App = () => {
         const { conversation_id, messages, completed } = data;
 
         if (messages) {
-          setConversations((prev) =>
-            prev.map((c) =>
-              c.id === conversation_id
-                ? { ...c, messages: messages as Message[] }
-                : c,
-            ),
-          );
+          setConversations((prev) => {
+            const exists = prev.some((c) => c.id === conversation_id);
+            if (exists) {
+              return prev.map((c) =>
+                c.id === conversation_id
+                  ? { ...c, messages: messages as Message[] }
+                  : c,
+              );
+            }
+            const title =
+              (messages as Message[])
+                .find((m: Message) => m.role === "user")
+                ?.content.slice(0, 40) || "New chat";
+            return [
+              ...prev,
+              {
+                id: conversation_id,
+                title,
+                messages: messages as Message[],
+              },
+            ];
+          });
         }
 
         if (completed) {
